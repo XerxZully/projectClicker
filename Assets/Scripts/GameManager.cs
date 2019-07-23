@@ -4,13 +4,13 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 using Vector3 = System.Numerics.Vector3;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager manager = null;
-
     [SerializeField] private Transform obj = null;
     [SerializeField] private Text scoreText = null;
+    [SerializeField] private Text scoreAdd = null;
     [SerializeField] private Text gameOverText = null;
     [SerializeField] private Button repeatButton = null;
     [SerializeField] private int maxObjects = 5;
@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
     private bool ingame = true;
     private int objects = 0;
     private int score = 0;
+    private int scoreView = 0;
+    private int scoreAddView = 0;
     private float[] corners = { -7.0f, -4.0f, 7.0f, 4.0f }; //x_min, y_min, x_max, y_max
 
     public static GameManager Instanse { get; private set; } = null;
@@ -64,7 +66,8 @@ public class GameManager : MonoBehaviour
     
     public void RepeatButtonOnClick()
     {
-        newGame();
+        //newGame();
+        SceneManager.LoadScene("StartMenu");
     }
     
     private void Update()
@@ -76,7 +79,7 @@ public class GameManager : MonoBehaviour
                 if ( hit.transform.tag == "Clickable") {
                     if (hit.collider.gameObject.GetComponent<Clicker>().changeHealth(-1))
                         objects--;
-                    addScore(1);
+                    addScore(10);
                 }
             }
         }
@@ -85,7 +88,25 @@ public class GameManager : MonoBehaviour
     public void addScore(int value)
     {
         score += value;
-        scoreText.text = "Score: " + score.ToString();
+        scoreAddView += value;
+        //scoreText.text = "Score: " + score.ToString();
+        StartCoroutine(ScoreAnimation());
+    }
+
+    private IEnumerator ScoreAnimation()
+    {
+        while (scoreAddView >= 0)
+        {
+            scoreAdd.text = "+" + scoreAddView.ToString();
+            scoreText.text = "Score: " + scoreView.ToString();
+            scoreView++;
+            scoreAddView--;
+            //yield return null;
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        yield return null;
+        scoreAdd.text = "";
     }
 
     private void SummonCube()
